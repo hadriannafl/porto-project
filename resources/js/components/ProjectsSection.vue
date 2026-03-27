@@ -1,12 +1,18 @@
 <template>
   <section id="projects" :class="['py-24 px-6', isDark ? 'bg-gray-900/50' : 'bg-white']">
     <div class="max-w-6xl mx-auto">
-      <SectionTitle title="Featured Projects" subtitle="What I've built" :isDark="isDark" />
+      <!-- Title + Admin Add button -->
+      <div class="relative">
+        <SectionTitle title="Featured Projects" subtitle="What I've built" :isDark="isDark" />
+        <button v-if="isAdmin" @click="showModal = true"
+          class="absolute right-0 top-0 flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-violet-600 to-cyan-500 text-white text-sm font-semibold hover:opacity-90 hover:-translate-y-0.5 transition-all shadow-lg shadow-violet-500/20">
+          <span class="text-base leading-none">+</span> Add Project
+        </button>
+      </div>
 
       <!-- Filter tabs -->
       <div class="flex flex-wrap justify-center gap-2 mt-10">
-        <button v-for="tab in tabs" :key="tab"
-          @click="activeTab = tab"
+        <button v-for="tab in tabs" :key="tab" @click="activeTab = tab"
           :class="['px-5 py-2 rounded-full text-sm font-semibold transition-all', activeTab === tab
             ? 'bg-gradient-to-r from-violet-600 to-cyan-500 text-white shadow-lg'
             : isDark ? 'bg-gray-800 text-gray-400 hover:bg-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200']">
@@ -14,22 +20,64 @@
         </button>
       </div>
 
-      <!-- Projects grid -->
-      <div class="mt-10 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div v-for="project in filteredProjects" :key="project.title"
-          :class="['group rounded-2xl overflow-hidden border transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl', isDark ? 'bg-gray-900 border-gray-800 hover:border-violet-500/40 hover:shadow-violet-500/10' : 'bg-white border-gray-200 hover:border-violet-200 hover:shadow-violet-100']">
+      <!-- Loading skeleton -->
+      <div v-if="loading" class="mt-10 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-for="i in 6" :key="i"
+          :class="['rounded-2xl overflow-hidden border animate-pulse', isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200']">
+          <div :class="['h-48', isDark ? 'bg-gray-800' : 'bg-gray-100']"></div>
+          <div class="p-6 space-y-3">
+            <div :class="['h-3 rounded-full w-1/2', isDark ? 'bg-gray-800' : 'bg-gray-100']"></div>
+            <div :class="['h-4 rounded-full w-3/4', isDark ? 'bg-gray-800' : 'bg-gray-100']"></div>
+            <div :class="['h-3 rounded-full', isDark ? 'bg-gray-800' : 'bg-gray-100']"></div>
+          </div>
+        </div>
+      </div>
 
-          <!-- Project image placeholder -->
-          <div :class="['h-48 flex items-center justify-center text-6xl relative overflow-hidden', project.bg]">
-            {{ project.emoji }}
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-end p-4 gap-2">
-              <a href="#" class="w-9 h-9 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/40 transition-colors text-sm">↗</a>
-              <a href="#" class="w-9 h-9 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/40 transition-colors text-sm">⌥</a>
+      <!-- Empty state -->
+      <div v-else-if="filteredProjects.length === 0" class="mt-16 text-center">
+        <div class="text-5xl mb-4">📂</div>
+        <p :class="['text-lg', isDark ? 'text-gray-500' : 'text-gray-400']">No projects yet in this category.</p>
+        <button v-if="isAdmin" @click="showModal = true"
+          class="mt-4 px-6 py-2.5 rounded-full bg-gradient-to-r from-violet-600 to-cyan-500 text-white text-sm font-semibold hover:opacity-90 transition-opacity">
+          Add First Project
+        </button>
+      </div>
+
+      <!-- Projects grid -->
+      <div v-else class="mt-10 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-for="project in filteredProjects" :key="project.id"
+          @click="isAdmin && openEdit(project)"
+          :class="['group rounded-2xl overflow-hidden border transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl', isDark ? 'bg-gray-900 border-gray-800 hover:border-violet-500/40 hover:shadow-violet-500/10' : 'bg-white border-gray-200 hover:border-violet-200 hover:shadow-violet-100', isAdmin ? 'cursor-pointer' : '']">
+
+          <!-- Project image -->
+          <div :class="['h-48 relative overflow-hidden', project.bg]">
+            <img v-if="project.image_url" :src="project.image_url" :alt="project.title"
+              class="w-full h-full object-cover">
+            <div v-else class="w-full h-full flex items-center justify-center">
+              <span :class="['text-6xl font-black opacity-30 select-none', isDark ? 'text-white' : 'text-white']">
+                {{ project.title.charAt(0) }}
+              </span>
+            </div>
+            <!-- Hover overlay -->
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between p-4">
+              <div class="flex items-center gap-2">
+                <span class="text-white text-sm font-medium">{{ project.year }}</span>
+                <span v-if="isAdmin" class="px-2 py-0.5 rounded-full bg-violet-500/70 text-white text-xs font-medium backdrop-blur-sm">
+                  ✏️ Click to edit
+                </span>
+              </div>
+              <div class="flex gap-2">
+                <a v-if="project.demo_url" :href="project.demo_url" target="_blank" @click.stop
+                  class="w-9 h-9 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/40 transition-colors text-sm">↗</a>
+                <a v-if="project.github_url" :href="project.github_url" target="_blank" @click.stop
+                  class="w-9 h-9 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/40 transition-colors text-sm">⌥</a>
+                <button v-if="isAdmin" @click.stop="deleteProject(project.id)"
+                  class="w-9 h-9 rounded-full bg-red-500/70 backdrop-blur-sm flex items-center justify-center text-white hover:bg-red-500 transition-colors text-sm">✕</button>
+              </div>
             </div>
           </div>
 
           <div class="p-6">
-            <!-- Tags -->
             <div class="flex flex-wrap gap-1.5 mb-3">
               <span v-for="tag in project.tags" :key="tag"
                 :class="['px-2.5 py-0.5 rounded-full text-xs font-medium', isDark ? 'bg-violet-950 text-violet-300 border border-violet-800' : 'bg-violet-50 text-violet-700 border border-violet-200']">
@@ -39,97 +87,300 @@
             <h3 :class="['text-lg font-bold mb-2', isDark ? 'text-white' : 'text-gray-900']">{{ project.title }}</h3>
             <p :class="['text-sm leading-relaxed', isDark ? 'text-gray-400' : 'text-gray-600']">{{ project.desc }}</p>
 
-            <!-- Footer -->
             <div :class="['flex items-center justify-between mt-4 pt-4 border-t', isDark ? 'border-gray-800' : 'border-gray-100']">
-              <span :class="['text-xs', isDark ? 'text-gray-500' : 'text-gray-400']">{{ project.year }}</span>
+              <span :class="['text-xs px-2.5 py-1 rounded-full font-medium', isDark ? 'bg-gray-800 text-gray-400' : 'bg-gray-100 text-gray-500']">
+                {{ project.category }}
+              </span>
               <div class="flex gap-3">
-                <a href="#" :class="['text-xs font-medium transition-colors', isDark ? 'text-violet-400 hover:text-violet-300' : 'text-violet-600 hover:text-violet-500']">Live Demo →</a>
-                <a href="#" :class="['text-xs font-medium transition-colors', isDark ? 'text-gray-500 hover:text-gray-400' : 'text-gray-500 hover:text-gray-700']">GitHub</a>
+                <a v-if="project.demo_url" :href="project.demo_url" target="_blank"
+                  :class="['text-xs font-medium transition-colors', isDark ? 'text-violet-400 hover:text-violet-300' : 'text-violet-600 hover:text-violet-500']">
+                  Live Demo →
+                </a>
+                <a v-if="project.github_url" :href="project.github_url" target="_blank"
+                  :class="['text-xs font-medium transition-colors', isDark ? 'text-gray-500 hover:text-gray-400' : 'text-gray-500 hover:text-gray-700']">
+                  GitHub
+                </a>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Load more -->
-      <div class="text-center mt-12">
-        <a href="#"
-          :class="['inline-flex items-center gap-2 px-8 py-3 rounded-full border-2 font-semibold transition-all hover:-translate-y-0.5', isDark ? 'border-violet-500/50 text-violet-300 hover:border-violet-400 hover:bg-violet-950/30' : 'border-violet-300 text-violet-700 hover:border-violet-500']">
-          View All Projects
-          <span>→</span>
-        </a>
+      <!-- Admin logout -->
+      <div class="text-center mt-12 flex items-center justify-center gap-4">
+        <form v-if="isAdmin" method="POST" action="/admin/logout">
+          <input type="hidden" name="_token" :value="csrfToken">
+          <button type="submit"
+            :class="['px-4 py-2 rounded-full text-xs font-medium border transition-all', isDark ? 'border-gray-700 text-gray-500 hover:border-red-700 hover:text-red-400' : 'border-gray-300 text-gray-400 hover:border-red-400 hover:text-red-500']">
+            Logout Admin
+          </button>
+        </form>
       </div>
     </div>
+
+    <!-- Add Project Modal -->
+    <Teleport to="body">
+      <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="closeModal"></div>
+
+        <div :class="['relative w-full max-w-lg rounded-2xl border shadow-2xl z-10 max-h-[90vh] overflow-y-auto', isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200']">
+          <!-- Header -->
+          <div :class="['flex items-center justify-between px-6 py-5 border-b sticky top-0 z-10', isDark ? 'border-gray-800 bg-gray-900' : 'border-gray-100 bg-white']">
+            <h2 :class="['text-lg font-bold', isDark ? 'text-white' : 'text-gray-900']">
+              {{ editingProject ? '✏️ Edit Project' : '+ Add Project' }}
+            </h2>
+            <button @click="closeModal" :class="['w-8 h-8 rounded-full flex items-center justify-center transition-colors', isDark ? 'hover:bg-gray-800 text-gray-400' : 'hover:bg-gray-100 text-gray-500']">✕</button>
+          </div>
+
+          <!-- Form -->
+          <form @submit.prevent="editingProject ? updateProject() : addProject()" class="p-6 space-y-4">
+            <!-- Image upload -->
+            <div>
+              <label :class="['block text-sm font-medium mb-1.5', isDark ? 'text-gray-300' : 'text-gray-700']">
+                Project Image
+              </label>
+              <!-- File input selalu ada di DOM -->
+              <input type="file" accept="image/*" class="hidden" ref="fileInput" @change="onImageChange">
+
+              <!-- Preview -->
+              <div v-if="imagePreview"
+                :class="['relative h-40 rounded-xl overflow-hidden border', isDark ? 'border-gray-700' : 'border-gray-200']">
+                <img :src="imagePreview" class="w-full h-full object-cover" alt="Preview">
+                <button type="button" @click="clearImage"
+                  class="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center text-xs hover:bg-red-500 transition-colors">
+                  ✕
+                </button>
+              </div>
+              <!-- Upload area -->
+              <div v-else @click="fileInput.click()"
+                :class="['flex flex-col items-center justify-center h-40 rounded-xl border-2 border-dashed cursor-pointer transition-colors',
+                  isDark ? 'border-gray-700 hover:border-violet-500 bg-gray-800/50' : 'border-gray-300 hover:border-violet-400 bg-gray-50']">
+                <span class="text-3xl mb-2">🖼️</span>
+                <span :class="['text-sm font-medium', isDark ? 'text-gray-400' : 'text-gray-500']">Click to upload image</span>
+                <span :class="['text-xs mt-1', isDark ? 'text-gray-600' : 'text-gray-400']">PNG, JPG, WEBP up to 5MB</span>
+              </div>
+            </div>
+
+            <div>
+              <label :class="labelClass">Project Title *</label>
+              <input v-model="form.title" type="text" placeholder="My Awesome Project" required :class="inputClass">
+            </div>
+
+            <div>
+              <label :class="labelClass">Description *</label>
+              <textarea v-model="form.desc" rows="3" placeholder="What does this project do?" required
+                :class="[inputClass, 'resize-none']"></textarea>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label :class="labelClass">Category *</label>
+                <select v-model="form.category" :class="inputClass">
+                  <option v-for="tab in tabs.slice(1)" :key="tab">{{ tab }}</option>
+                </select>
+              </div>
+              <div>
+                <label :class="labelClass">Year *</label>
+                <input v-model="form.year" type="text" placeholder="2024" :class="inputClass">
+              </div>
+            </div>
+
+            <div>
+              <label :class="labelClass">Tags <span :class="isDark ? 'text-gray-500' : 'text-gray-400'">(comma separated)</span></label>
+              <input v-model="form.tags" type="text" placeholder="Vue.js, Laravel, MySQL" :class="inputClass">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label :class="labelClass">Live Demo URL</label>
+                <input v-model="form.demo_url" type="url" placeholder="https://..." :class="inputClass">
+              </div>
+              <div>
+                <label :class="labelClass">GitHub URL</label>
+                <input v-model="form.github_url" type="url" placeholder="https://github.com/..." :class="inputClass">
+              </div>
+            </div>
+
+            <!-- Error -->
+            <p v-if="error" class="text-red-400 text-sm px-1">{{ error }}</p>
+
+            <div class="flex gap-3 pt-2">
+              <button type="button" @click="closeModal"
+                :class="['flex-1 py-3 rounded-xl text-sm font-semibold border transition-colors', isDark ? 'border-gray-700 text-gray-400 hover:bg-gray-800' : 'border-gray-300 text-gray-600 hover:bg-gray-50']">
+                Cancel
+              </button>
+              <button type="submit" :disabled="submitting"
+                class="flex-1 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-cyan-500 text-white text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                <span v-if="submitting" class="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+                {{ submitting ? 'Saving...' : editingProject ? 'Update Project' : 'Save Project' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </Teleport>
   </section>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import SectionTitle from './SectionTitle.vue'
-defineProps(['isDark'])
 
-const activeTab = ref('All')
+const props = defineProps(['isDark', 'isAdmin'])
+
+const showModal      = ref(false)
+const editingProject = ref(null)
+const activeTab      = ref('All')
+const projects       = ref([])
+const loading        = ref(true)
+const submitting     = ref(false)
+const error          = ref('')
+const imagePreview   = ref('')
+const fileInput      = ref(null)
+const selectedFile   = ref(null)
+
 const tabs = ['All', 'Frontend', 'Backend', 'Full Stack']
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? ''
 
-const projects = [
-  {
-    title: 'E-Commerce Platform',
-    desc: 'A full-featured online store with real-time inventory, payment gateway integration, and admin dashboard.',
-    tags: ['Vue.js', 'Laravel', 'MySQL'],
-    emoji: '🛒',
-    bg: 'bg-gradient-to-br from-violet-900 to-purple-900',
-    year: '2024',
-    category: 'Full Stack',
-  },
-  {
-    title: 'Real-time Chat App',
-    desc: 'WebSocket-powered messaging platform with rooms, file sharing, and end-to-end encryption.',
-    tags: ['Vue.js', 'Node.js', 'Socket.io'],
-    emoji: '💬',
-    bg: 'bg-gradient-to-br from-cyan-900 to-blue-900',
-    year: '2024',
-    category: 'Full Stack',
-  },
-  {
-    title: 'Design System UI',
-    desc: 'Comprehensive component library with 50+ reusable components, dark mode, and accessibility support.',
-    tags: ['Vue.js', 'Tailwind', 'Storybook'],
-    emoji: '🎨',
-    bg: 'bg-gradient-to-br from-pink-900 to-rose-900',
-    year: '2023',
-    category: 'Frontend',
-  },
-  {
-    title: 'REST API Service',
-    desc: 'High-performance microservices API with OAuth2, rate limiting, caching, and auto-generated docs.',
-    tags: ['Laravel', 'Redis', 'Docker'],
-    emoji: '⚡',
-    bg: 'bg-gradient-to-br from-amber-900 to-orange-900',
-    year: '2023',
-    category: 'Backend',
-  },
-  {
-    title: 'Analytics Dashboard',
-    desc: 'Interactive data visualization dashboard with real-time charts, filters, and export capabilities.',
-    tags: ['Vue.js', 'Chart.js', 'Tailwind'],
-    emoji: '📊',
-    bg: 'bg-gradient-to-br from-emerald-900 to-teal-900',
-    year: '2024',
-    category: 'Frontend',
-  },
-  {
-    title: 'Task Manager Pro',
-    desc: 'Kanban-style project management tool with team collaboration, time tracking, and notifications.',
-    tags: ['Vue.js', 'Laravel', 'WebSocket'],
-    emoji: '📋',
-    bg: 'bg-gradient-to-br from-indigo-900 to-violet-900',
-    year: '2023',
-    category: 'Full Stack',
-  },
-]
+const emptyForm = () => ({ title: '', desc: '', tags: '', year: new Date().getFullYear().toString(), category: 'Full Stack', demo_url: '', github_url: '' })
+const form = ref(emptyForm())
 
 const filteredProjects = computed(() => {
-  if (activeTab.value === 'All') return projects
-  return projects.filter(p => p.category === activeTab.value)
+  if (activeTab.value === 'All') return projects.value
+  return projects.value.filter(p => p.category === activeTab.value)
 })
+
+const labelClass = computed(() => ['block text-sm font-medium mb-1.5', props.isDark ? 'text-gray-300' : 'text-gray-700'])
+const inputClass = computed(() => [
+  'w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20',
+  props.isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400',
+])
+
+function openEdit(project) {
+  editingProject.value = project
+  form.value = {
+    title:      project.title,
+    desc:       project.desc,
+    tags:       Array.isArray(project.tags) ? project.tags.join(', ') : project.tags,
+    year:       project.year,
+    category:   project.category,
+    demo_url:   project.demo_url ?? '',
+    github_url: project.github_url ?? '',
+  }
+  imagePreview.value = project.image_url ?? ''
+  showModal.value = true
+}
+
+async function fetchProjects() {
+  loading.value = true
+  try {
+    const res = await fetch('/api/projects')
+    projects.value = await res.json()
+  } finally {
+    loading.value = false
+  }
+}
+
+function onImageChange(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  selectedFile.value = file
+  imagePreview.value = URL.createObjectURL(file)
+}
+
+function clearImage() {
+  imagePreview.value = ''
+  selectedFile.value = null
+  if (fileInput.value) fileInput.value.value = ''
+}
+
+async function addProject() {
+  error.value = ''
+  submitting.value = true
+
+  try {
+    const fd = new FormData()
+    fd.append('title',      form.value.title)
+    fd.append('desc',       form.value.desc)
+    fd.append('tags',       form.value.tags)
+    fd.append('year',       form.value.year)
+    fd.append('category',   form.value.category)
+    if (form.value.demo_url)   fd.append('demo_url',   form.value.demo_url)
+    if (form.value.github_url) fd.append('github_url', form.value.github_url)
+    if (selectedFile.value) fd.append('image', selectedFile.value)
+
+    const res = await fetch('/api/projects', {
+      method: 'POST',
+      headers: { 'X-CSRF-TOKEN': csrfToken },
+      body: fd,
+    })
+
+    if (!res.ok) {
+      const json = await res.json()
+      error.value = Object.values(json.errors ?? {}).flat()[0] ?? 'Failed to save.'
+      return
+    }
+
+    const project = await res.json()
+    projects.value.unshift(project)
+    closeModal()
+  } finally {
+    submitting.value = false
+  }
+}
+
+async function updateProject() {
+  error.value = ''
+  submitting.value = true
+
+  try {
+    const fd = new FormData()
+    fd.append('title',    form.value.title)
+    fd.append('desc',     form.value.desc)
+    fd.append('tags',     form.value.tags)
+    fd.append('year',     form.value.year)
+    fd.append('category', form.value.category)
+    if (form.value.demo_url)   fd.append('demo_url',   form.value.demo_url)
+    if (form.value.github_url) fd.append('github_url', form.value.github_url)
+    if (selectedFile.value)    fd.append('image', selectedFile.value)
+
+    const res = await fetch(`/api/projects/${editingProject.value.id}`, {
+      method: 'POST',
+      headers: { 'X-CSRF-TOKEN': csrfToken },
+      body: fd,
+    })
+
+    if (!res.ok) {
+      const json = await res.json()
+      error.value = Object.values(json.errors ?? {}).flat()[0] ?? 'Failed to update.'
+      return
+    }
+
+    const updated = await res.json()
+    const idx = projects.value.findIndex(p => p.id === updated.id)
+    if (idx !== -1) projects.value[idx] = updated
+    closeModal()
+  } finally {
+    submitting.value = false
+  }
+}
+
+async function deleteProject(id) {
+  if (!confirm('Delete this project?')) return
+  await fetch(`/api/projects/${id}`, {
+    method: 'DELETE',
+    headers: { 'X-CSRF-TOKEN': csrfToken },
+  })
+  projects.value = projects.value.filter(p => p.id !== id)
+}
+
+function closeModal() {
+  showModal.value = false
+  editingProject.value = null
+  form.value = emptyForm()
+  clearImage()
+  error.value = ''
+}
+
+onMounted(fetchProjects)
 </script>

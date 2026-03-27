@@ -2,7 +2,7 @@
   <nav :class="['fixed top-0 w-full z-50 transition-all duration-300', scrolled ? (isDark ? 'bg-gray-950/90 backdrop-blur-md shadow-lg shadow-black/20' : 'bg-white/90 backdrop-blur-md shadow-lg') : 'bg-transparent']">
     <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
       <a href="#" class="text-xl font-bold bg-gradient-to-r from-violet-500 to-cyan-400 bg-clip-text text-transparent">
-        &lt;DevPorto /&gt;
+        &lt;IanDev /&gt;
       </a>
 
       <div class="hidden md:flex items-center gap-8">
@@ -19,9 +19,9 @@
           <span v-else>🌙</span>
         </button>
 
-        <button class="hidden md:block px-4 py-2 rounded-full bg-gradient-to-r from-violet-600 to-cyan-500 text-white text-sm font-medium hover:opacity-90 transition-opacity">
+        <a href="#contact" class="hidden md:block px-4 py-2 rounded-full bg-gradient-to-r from-violet-600 to-cyan-500 text-white text-sm font-medium hover:opacity-90 transition-opacity">
           Hire Me
-        </button>
+        </a>
 
         <button @click="menuOpen = !menuOpen" class="md:hidden p-2">
           <div :class="['w-5 h-0.5 transition-all mb-1', isDark ? 'bg-white' : 'bg-gray-900']"></div>

@@ -31,7 +31,7 @@
             Passionate Developer & Creative Thinker
           </h3>
           <p :class="['text-lg leading-relaxed mb-4', isDark ? 'text-gray-400' : 'text-gray-600']">
-            Hi! I'm Alex, a Full Stack Developer with 3+ years of experience building modern web applications.
+            Hi! I'm Ian, a Full Stack Developer with 2+ years of experience building modern web applications.
             I specialize in <span class="text-violet-500 font-semibold">Vue.js</span> and <span class="text-cyan-500 font-semibold">Laravel</span>,
             creating seamless user experiences backed by solid architecture.
           </p>
@@ -70,8 +70,8 @@ defineProps(['isDark'])
 
 const infos = [
   { icon: '📍', label: 'Location', value: 'Jakarta, Indonesia' },
-  { icon: '🎓', label: 'Education', value: 'Computer Science' },
-  { icon: '💼', label: 'Experience', value: '3+ Years' },
+  { icon: '🎓', label: 'Education', value: 'Information System' },
+  { icon: '💼', label: 'Experience', value: '2+ Years' },
   { icon: '🌐', label: 'Languages', value: 'EN, ID' },
 ]
 </script>

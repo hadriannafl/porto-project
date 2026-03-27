@@ -79,16 +79,16 @@ import { ref, onMounted, onUnmounted } from 'vue'
 
 defineProps(['isDark'])
 
-const name = 'Alex Dev'
+const name = 'Ian Dev'
 const roles = ['Full Stack Developer', 'UI/UX Enthusiast', 'Vue.js Expert', 'Laravel Developer', 'Problem Solver']
 const currentRole = ref(roles[0])
 let roleIndex = 0
 let interval
 
 const stats = [
-  { value: '3+', label: 'Years Exp.' },
-  { value: '50+', label: 'Projects' },
-  { value: '30+', label: 'Clients' },
+  { value: '2+', label: 'Years Exp.' },
+  { value: '2+', label: 'Projects' },
+  { value: '1+', label: 'Clients' },
 ]
 
 onMounted(() => {

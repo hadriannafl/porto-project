@@ -1,0 +1,135 @@
+<template>
+  <section id="contact" :class="['py-24 px-6', isDark ? 'bg-gray-950' : 'bg-gray-50']">
+    <div class="max-w-6xl mx-auto">
+      <SectionTitle title="Get In Touch" subtitle="Let's work together" :isDark="isDark" />
+
+      <div class="grid md:grid-cols-2 gap-12 mt-16">
+        <!-- Left: info -->
+        <div>
+          <h3 :class="['text-2xl font-bold mb-4', isDark ? 'text-white' : 'text-gray-900']">
+            Let's build something amazing together
+          </h3>
+          <p :class="['text-lg leading-relaxed mb-8', isDark ? 'text-gray-400' : 'text-gray-600']">
+            Whether you have a project in mind, want to collaborate, or just want to say hello —
+            my inbox is always open. I'll get back to you within 24 hours!
+          </p>
+
+          <!-- Contact items -->
+          <div class="space-y-4">
+            <div v-for="item in contactItems" :key="item.label"
+              :class="['flex items-center gap-4 p-4 rounded-xl transition-all hover:scale-105 cursor-pointer', isDark ? 'bg-gray-900 border border-gray-800 hover:border-violet-500/40' : 'bg-white border border-gray-200 hover:border-violet-300 hover:shadow-md']">
+              <div :class="['w-12 h-12 rounded-xl flex items-center justify-center text-xl', item.bg]">
+                {{ item.icon }}
+              </div>
+              <div>
+                <div :class="['text-xs font-medium', isDark ? 'text-gray-500' : 'text-gray-400']">{{ item.label }}</div>
+                <div :class="['font-semibold', isDark ? 'text-white' : 'text-gray-800']">{{ item.value }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Social links -->
+          <div class="flex gap-3 mt-8">
+            <a v-for="social in socials" :key="social.label" href="#"
+              :class="['w-12 h-12 rounded-xl flex items-center justify-center text-xl transition-all hover:scale-110 hover:-translate-y-1', isDark ? 'bg-gray-900 border border-gray-800 hover:border-violet-500/50' : 'bg-white border border-gray-200 hover:border-violet-300 hover:shadow-md']"
+              :title="social.label">
+              {{ social.icon }}
+            </a>
+          </div>
+        </div>
+
+        <!-- Right: form -->
+        <div :class="['p-8 rounded-2xl border', isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200 shadow-sm']">
+          <form @submit.prevent="sendMessage" class="space-y-5">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label :class="['block text-sm font-medium mb-2', isDark ? 'text-gray-300' : 'text-gray-700']">Name</label>
+                <input v-model="form.name" type="text" placeholder="John Doe"
+                  :class="['w-full px-4 py-3 rounded-xl border text-sm outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20', isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400']">
+              </div>
+              <div>
+                <label :class="['block text-sm font-medium mb-2', isDark ? 'text-gray-300' : 'text-gray-700']">Email</label>
+                <input v-model="form.email" type="email" placeholder="john@example.com"
+                  :class="['w-full px-4 py-3 rounded-xl border text-sm outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20', isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400']">
+              </div>
+            </div>
+            <div>
+              <label :class="['block text-sm font-medium mb-2', isDark ? 'text-gray-300' : 'text-gray-700']">Subject</label>
+              <input v-model="form.subject" type="text" placeholder="Project discussion..."
+                :class="['w-full px-4 py-3 rounded-xl border text-sm outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20', isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400']">
+            </div>
+            <div>
+              <label :class="['block text-sm font-medium mb-2', isDark ? 'text-gray-300' : 'text-gray-700']">Message</label>
+              <textarea v-model="form.message" rows="5" placeholder="Tell me about your project..."
+                :class="['w-full px-4 py-3 rounded-xl border text-sm outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 resize-none', isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400']"></textarea>
+            </div>
+            <!-- Error -->
+            <p v-if="error" class="text-red-400 text-sm text-center px-1">{{ error }}</p>
+
+            <button type="submit" :disabled="sending || sent"
+              :class="['w-full py-4 rounded-xl font-semibold text-white transition-all flex items-center justify-center gap-2 disabled:cursor-not-allowed',
+                sent ? 'bg-green-500' : 'bg-gradient-to-r from-violet-600 to-cyan-500 hover:opacity-90 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-violet-500/30 disabled:opacity-70']">
+              <span v-if="sending" class="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+              {{ sent ? '✓ Message Sent!' : sending ? 'Sending...' : 'Send Message →' }}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import SectionTitle from './SectionTitle.vue'
+defineProps(['isDark'])
+
+const form    = ref({ name: '', email: '', subject: '', message: '' })
+const sent    = ref(false)
+const sending = ref(false)
+const error   = ref('')
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? ''
+
+const sendMessage = async () => {
+  error.value = ''
+  sending.value = true
+
+  try {
+    const res = await fetch('/api/contact', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': csrfToken,
+      },
+      body: JSON.stringify(form.value),
+    })
+
+    if (!res.ok) {
+      const json = await res.json()
+      error.value = Object.values(json.errors ?? {}).flat()[0] ?? 'Failed to send. Please try again.'
+      return
+    }
+
+    sent.value = true
+    form.value = { name: '', email: '', subject: '', message: '' }
+    setTimeout(() => { sent.value = false }, 4000)
+  } catch {
+    error.value = 'Network error. Please try again.'
+  } finally {
+    sending.value = false
+  }
+}
+
+const contactItems = [
+  { icon: '📧', label: 'Email', value: 'hadriannaufal11@gmail.com', bg: 'bg-violet-900/50 text-violet-400' },
+  { icon: '📍', label: 'Location', value: 'Jakarta, Indonesia', bg: 'bg-cyan-900/50 text-cyan-400' },
+  { icon: '💼', label: 'Availability', value: 'Open to opportunities', bg: 'bg-green-900/50 text-green-400' },
+]
+
+const socials = [
+  { icon: '🐙', label: 'GitHub' },
+  { icon: '💼', label: 'LinkedIn' },
+  { icon: '🐦', label: 'Twitter' },
+  { icon: '📸', label: 'Instagram' },
+]
+</script>

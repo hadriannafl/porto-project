@@ -4,7 +4,7 @@
     <HeroSection :isDark="isDark" />
     <AboutSection :isDark="isDark" />
     <SkillsSection :isDark="isDark" />
-    <ProjectsSection :isDark="isDark" />
+    <ProjectsSection :isDark="isDark" :isAdmin="isAdmin" />
     <ContactSection :isDark="isDark" />
     <FooterSection :isDark="isDark" />
   </div>
@@ -21,4 +21,5 @@ import ContactSection from './components/ContactSection.vue'
 import FooterSection from './components/FooterSection.vue'
 
 const isDark = ref(true)
+const isAdmin = window.__IS_ADMIN__ === true
 </script>
