@@ -374,7 +374,7 @@ async function addProject() {
 
     const res = await fetch('/api/projects', {
       method: 'POST',
-      headers: { 'X-CSRF-TOKEN': csrfToken },
+      headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
       body: fd,
     })
 
@@ -410,7 +410,7 @@ async function updateProject() {
 
     const res = await fetch(`/api/projects/${editingProject.value.id}`, {
       method: 'POST',
-      headers: { 'X-CSRF-TOKEN': csrfToken },
+      headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
       body: fd,
     })
 
@@ -433,7 +433,7 @@ async function deleteProject(id) {
   if (!confirm('Delete this project?')) return
   await fetch(`/api/projects/${id}`, {
     method: 'DELETE',
-    headers: { 'X-CSRF-TOKEN': csrfToken },
+    headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
   })
   projects.value = projects.value.filter(p => p.id !== id)
 }
