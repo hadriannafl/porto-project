@@ -5,7 +5,7 @@
         &lt;IanDev /&gt;
       </div>
       <p :class="['text-sm', isDark ? 'text-gray-500' : 'text-gray-400']">
-        © {{ new Date().getFullYear() }} Ian Dev. Crafted with 💜 using Vue.js & Laravel.
+        © {{ new Date().getFullYear() }} Ian Dev.
       </p>
       <div class="flex gap-6">
         <a v-for="link in links" :key="link" href="#"
