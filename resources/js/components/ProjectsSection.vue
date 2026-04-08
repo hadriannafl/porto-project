@@ -41,7 +41,7 @@
 
           <!-- Project image -->
           <div :class="['h-48 relative overflow-hidden', project.bg]">
-            <img v-if="project.image_url" :src="project.image_url" :alt="project.title"
+            <img v-if="project.image_urls && project.image_urls.length" :src="project.image_urls[0]" :alt="project.title"
               class="w-full h-full object-cover">
             <div v-else class="w-full h-full flex items-center justify-center">
               <span :class="['text-6xl font-black opacity-30 select-none', isDark ? 'text-white' : 'text-white']">
@@ -124,30 +124,39 @@
 
           <!-- Form -->
           <form @submit.prevent="editingProject ? updateProject() : addProject()" class="p-6 space-y-4">
-            <!-- Image upload -->
+            <!-- Image upload (max 5) -->
             <div>
               <label :class="['block text-sm font-medium mb-1.5', isDark ? 'text-gray-300' : 'text-gray-700']">
-                Project Image
+                Project Images <span :class="isDark ? 'text-gray-500' : 'text-gray-400'">(max 5)</span>
               </label>
-              <!-- File input selalu ada di DOM -->
-              <input type="file" accept="image/*" class="hidden" ref="fileInput" @change="onImageChange">
+              <input type="file" accept="image/*" multiple class="hidden" ref="fileInput" @change="onImageChange">
 
-              <!-- Preview -->
-              <div v-if="imagePreview"
-                :class="['relative h-40 rounded-xl overflow-hidden border', isDark ? 'border-gray-700' : 'border-gray-200']">
-                <img :src="imagePreview" class="w-full h-full object-cover" alt="Preview">
-                <button type="button" @click="clearImage"
-                  class="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center text-xs hover:bg-red-500 transition-colors">
-                  ✕
-                </button>
+              <!-- Previews grid -->
+              <div v-if="imagePreviews.length" class="grid grid-cols-3 gap-2 mb-2">
+                <div v-for="(preview, idx) in imagePreviews" :key="idx"
+                  :class="['relative h-24 rounded-xl overflow-hidden border', isDark ? 'border-gray-700' : 'border-gray-200']">
+                  <img :src="preview.url" class="w-full h-full object-cover" alt="Preview">
+                  <button type="button" @click="removeImage(idx)"
+                    class="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center text-xs hover:bg-red-500 transition-colors">
+                    ✕
+                  </button>
+                </div>
+                <!-- Add more button if < 5 -->
+                <div v-if="imagePreviews.length < 5" @click="fileInput.click()"
+                  :class="['flex flex-col items-center justify-center h-24 rounded-xl border-2 border-dashed cursor-pointer transition-colors',
+                    isDark ? 'border-gray-700 hover:border-violet-500 bg-gray-800/50' : 'border-gray-300 hover:border-violet-400 bg-gray-50']">
+                  <span class="text-2xl">+</span>
+                  <span :class="['text-xs', isDark ? 'text-gray-500' : 'text-gray-400']">Add more</span>
+                </div>
               </div>
-              <!-- Upload area -->
+
+              <!-- Upload area (empty) -->
               <div v-else @click="fileInput.click()"
-                :class="['flex flex-col items-center justify-center h-40 rounded-xl border-2 border-dashed cursor-pointer transition-colors',
+                :class="['flex flex-col items-center justify-center h-32 rounded-xl border-2 border-dashed cursor-pointer transition-colors',
                   isDark ? 'border-gray-700 hover:border-violet-500 bg-gray-800/50' : 'border-gray-300 hover:border-violet-400 bg-gray-50']">
                 <span class="text-3xl mb-2">🖼️</span>
-                <span :class="['text-sm font-medium', isDark ? 'text-gray-400' : 'text-gray-500']">Click to upload image</span>
-                <span :class="['text-xs mt-1', isDark ? 'text-gray-600' : 'text-gray-400']">PNG, JPG, WEBP up to 5MB</span>
+                <span :class="['text-sm font-medium', isDark ? 'text-gray-400' : 'text-gray-500']">Click to upload images</span>
+                <span :class="['text-xs mt-1', isDark ? 'text-gray-600' : 'text-gray-400']">PNG, JPG, WEBP — up to 5 images, max 5MB each</span>
               </div>
             </div>
 
@@ -224,9 +233,10 @@ const projects       = ref([])
 const loading        = ref(true)
 const submitting     = ref(false)
 const error          = ref('')
-const imagePreview   = ref('')
 const fileInput      = ref(null)
-const selectedFile   = ref(null)
+// imagePreviews: [{ url: string, file: File|null, path: string|null }]
+const imagePreviews  = ref([])
+const removedPaths   = ref([])
 
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? ''
 
@@ -254,7 +264,10 @@ function openEdit(project) {
     demo_url:   project.demo_url ?? '',
     github_url: project.github_url ?? '',
   }
-  imagePreview.value = project.image_url ?? ''
+  const paths = project.image ?? []
+  const urls  = project.image_urls ?? []
+  imagePreviews.value = paths.map((path, i) => ({ url: urls[i] ?? '', file: null, path }))
+  removedPaths.value = []
   showModal.value = true
 }
 
@@ -269,16 +282,18 @@ async function fetchProjects() {
 }
 
 function onImageChange(e) {
-  const file = e.target.files[0]
-  if (!file) return
-  selectedFile.value = file
-  imagePreview.value = URL.createObjectURL(file)
+  const files = Array.from(e.target.files)
+  const remaining = 5 - imagePreviews.value.length
+  files.slice(0, remaining).forEach(file => {
+    imagePreviews.value.push({ url: URL.createObjectURL(file), file, path: null })
+  })
+  if (fileInput.value) fileInput.value.value = ''
 }
 
-function clearImage() {
-  imagePreview.value = ''
-  selectedFile.value = null
-  if (fileInput.value) fileInput.value.value = ''
+function removeImage(idx) {
+  const item = imagePreviews.value[idx]
+  if (item.path) removedPaths.value.push(item.path)
+  imagePreviews.value.splice(idx, 1)
 }
 
 async function addProject() {
@@ -294,7 +309,7 @@ async function addProject() {
     fd.append('category',   form.value.category)
     if (form.value.demo_url)   fd.append('demo_url',   form.value.demo_url)
     if (form.value.github_url) fd.append('github_url', form.value.github_url)
-    if (selectedFile.value) fd.append('image', selectedFile.value)
+    imagePreviews.value.filter(p => p.file).forEach(p => fd.append('images[]', p.file))
 
     const res = await fetch('/api/projects', {
       method: 'POST',
@@ -329,7 +344,8 @@ async function updateProject() {
     fd.append('category', form.value.category)
     if (form.value.demo_url)   fd.append('demo_url',   form.value.demo_url)
     if (form.value.github_url) fd.append('github_url', form.value.github_url)
-    if (selectedFile.value)    fd.append('image', selectedFile.value)
+    imagePreviews.value.filter(p => p.file).forEach(p => fd.append('images[]', p.file))
+    fd.append('removed_images', JSON.stringify(removedPaths.value))
 
     const res = await fetch(`/api/projects/${editingProject.value.id}`, {
       method: 'POST',
@@ -365,7 +381,9 @@ function closeModal() {
   showModal.value = false
   editingProject.value = null
   form.value = emptyForm()
-  clearImage()
+  imagePreviews.value = []
+  removedPaths.value = []
+  if (fileInput.value) fileInput.value.value = ''
   error.value = ''
 }
 

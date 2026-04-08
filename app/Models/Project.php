@@ -11,13 +11,15 @@ class Project extends Model
     ];
 
     protected $casts = [
-        'tags' => 'array',
+        'tags'  => 'array',
+        'image' => 'array',
     ];
 
-    protected $appends = ['image_url'];
+    protected $appends = ['image_urls'];
 
-    public function getImageUrlAttribute(): ?string
+    public function getImageUrlsAttribute(): array
     {
-        return $this->image ? asset('storage/' . $this->image) : null;
+        $images = $this->image ?? [];
+        return array_values(array_map(fn($img) => asset('storage/' . $img), $images));
     }
 }

@@ -24,10 +24,10 @@ class ProjectController extends Controller
         $data = $request->validate([
             'title'      => 'required|string|max:255',
             'desc'       => 'required|string',
-            'image'      => 'nullable|image|max:5120',
+            'images.*'   => 'nullable|image|max:5120',
             'tags'       => 'required|string',
             'year'       => 'required|string|size:4',
-            'category'   => 'required|in:Frontend,Backend,Full Stack',
+            'category'   => 'required|in:Frontend,Backend,Full Stack,Mobile,Other',
             'demo_url'   => 'nullable|url',
             'github_url' => 'nullable|url',
         ]);
@@ -41,15 +41,17 @@ class ProjectController extends Controller
             'bg-gradient-to-br from-indigo-900 to-violet-900',
         ];
 
-        $imagePath = null;
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('projects', 'public');
+        $imagePaths = [];
+        if ($request->hasFile('images')) {
+            foreach (array_slice($request->file('images'), 0, 5) as $file) {
+                $imagePaths[] = $file->store('projects', 'public');
+            }
         }
 
         $project = Project::create([
             'title'      => $data['title'],
             'desc'       => $data['desc'],
-            'image'      => $imagePath,
+            'image'      => $imagePaths,
             'tags'       => array_map('trim', explode(',', $data['tags'])),
             'year'       => $data['year'],
             'category'   => $data['category'],
@@ -69,27 +71,40 @@ class ProjectController extends Controller
         }
 
         $data = $request->validate([
-            'title'      => 'required|string|max:255',
-            'desc'       => 'required|string',
-            'image'      => 'nullable|image|max:5120',
-            'tags'       => 'required|string',
-            'year'       => 'required|string|size:4',
-            'category'   => 'required|in:Frontend,Backend,Full Stack',
-            'demo_url'   => 'nullable|url',
-            'github_url' => 'nullable|url',
+            'title'           => 'required|string|max:255',
+            'desc'            => 'required|string',
+            'images.*'        => 'nullable|image|max:5120',
+            'removed_images'  => 'nullable|string',
+            'tags'            => 'required|string',
+            'year'            => 'required|string|size:4',
+            'category'        => 'required|in:Frontend,Backend,Full Stack,Mobile,Other',
+            'demo_url'        => 'nullable|url',
+            'github_url'      => 'nullable|url',
         ]);
 
-        if ($request->hasFile('image')) {
-            if ($project->image) {
-                Storage::disk('public')->delete($project->image);
+        $currentImages = $project->image ?? [];
+
+        // Remove images that were deleted by user
+        if (!empty($data['removed_images'])) {
+            $removed = json_decode($data['removed_images'], true) ?? [];
+            foreach ($removed as $path) {
+                Storage::disk('public')->delete($path);
+                $currentImages = array_values(array_filter($currentImages, fn($img) => $img !== $path));
             }
-            $data['image'] = $request->file('image')->store('projects', 'public');
+        }
+
+        // Add new uploaded images (max 5 total)
+        if ($request->hasFile('images')) {
+            $remaining = 5 - count($currentImages);
+            foreach (array_slice($request->file('images'), 0, $remaining) as $file) {
+                $currentImages[] = $file->store('projects', 'public');
+            }
         }
 
         $project->update([
             'title'      => $data['title'],
             'desc'       => $data['desc'],
-            'image'      => $data['image'] ?? $project->image,
+            'image'      => $currentImages,
             'tags'       => array_map('trim', explode(',', $data['tags'])),
             'year'       => $data['year'],
             'category'   => $data['category'],
@@ -106,8 +121,8 @@ class ProjectController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        if ($project->image) {
-            Storage::disk('public')->delete($project->image);
+        foreach ($project->image ?? [] as $img) {
+            Storage::disk('public')->delete($img);
         }
 
         $project->delete();
