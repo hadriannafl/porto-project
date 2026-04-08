@@ -17,7 +17,7 @@ WORKDIR /app
 
 # Install PHP dependencies
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
 # Install Node dependencies and build assets
 COPY package.json package-lock.json ./
@@ -25,7 +25,8 @@ RUN npm ci
 
 COPY . .
 
-RUN npm run build \
+RUN composer dump-autoload --optimize \
+    && npm run build \
     && php artisan config:cache \
     && php artisan route:cache \
     && php artisan view:cache \
