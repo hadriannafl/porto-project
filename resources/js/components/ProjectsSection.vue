@@ -3,10 +3,10 @@
     <div class="max-w-6xl mx-auto">
       <!-- Title + Admin Add button -->
       <div class="relative">
-        <SectionTitle title="Featured Projects" subtitle="What I've built" :isDark="isDark" />
+        <SectionTitle :title="t('projects.title')" :subtitle="t('projects.subtitle')" :isDark="isDark" />
         <button v-if="isAdmin" @click="showModal = true"
           class="absolute right-0 top-0 flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-violet-600 to-cyan-500 text-white text-sm font-semibold hover:opacity-90 hover:-translate-y-0.5 transition-all shadow-lg shadow-violet-500/20">
-          <span class="text-base leading-none">+</span> Add Project
+          <span class="text-base leading-none">+</span> {{ t('projects.addProject') }}
         </button>
       </div>
 
@@ -26,10 +26,10 @@
       <!-- Empty state -->
       <div v-else-if="filteredProjects.length === 0" class="mt-16 text-center">
         <div class="text-5xl mb-4">📂</div>
-        <p :class="['text-lg', isDark ? 'text-gray-500' : 'text-gray-400']">No projects yet in this category.</p>
+        <p :class="['text-lg', isDark ? 'text-gray-500' : 'text-gray-400']">{{ t('projects.empty') }}</p>
         <button v-if="isAdmin" @click="showModal = true"
           class="mt-4 px-6 py-2.5 rounded-full bg-gradient-to-r from-violet-600 to-cyan-500 text-white text-sm font-semibold hover:opacity-90 transition-opacity">
-          Add First Project
+          {{ t('projects.addFirst') }}
         </button>
       </div>
 
@@ -40,7 +40,8 @@
           :class="['group rounded-2xl overflow-hidden border transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl', isDark ? 'bg-gray-900 border-gray-800 hover:border-violet-500/40 hover:shadow-violet-500/10' : 'bg-white border-gray-200 hover:border-violet-200 hover:shadow-violet-100', isAdmin ? 'cursor-pointer' : '']">
 
           <!-- Project image -->
-          <div :class="['h-48 relative overflow-hidden', project.bg]">
+          <div :class="['h-48 relative overflow-hidden', project.bg, !isAdmin && project.image_urls?.length ? 'cursor-zoom-in' : '']"
+            @click.stop="!isAdmin && project.image_urls?.length && openLightbox(project, 0)">
             <img v-if="project.image_urls && project.image_urls.length" :src="project.image_urls[0]" :alt="project.title"
               class="w-full h-full object-cover">
             <div v-else class="w-full h-full flex items-center justify-center">
@@ -53,7 +54,7 @@
               <div class="flex items-center gap-2">
                 <span class="text-white text-sm font-medium">{{ project.year }}</span>
                 <span v-if="isAdmin" class="px-2 py-0.5 rounded-full bg-violet-500/70 text-white text-xs font-medium backdrop-blur-sm">
-                  ✏️ Click to edit
+                  {{ t('projects.clickEdit') }}
                 </span>
               </div>
               <div class="flex gap-2">
@@ -84,7 +85,7 @@
               <div class="flex gap-3">
                 <a v-if="project.demo_url" :href="project.demo_url" target="_blank"
                   :class="['text-xs font-medium transition-colors', isDark ? 'text-violet-400 hover:text-violet-300' : 'text-violet-600 hover:text-violet-500']">
-                  Live Demo →
+                  {{ t('projects.liveDemo') }}
                 </a>
                 <a v-if="project.github_url" :href="project.github_url" target="_blank"
                   :class="['text-xs font-medium transition-colors', isDark ? 'text-gray-500 hover:text-gray-400' : 'text-gray-500 hover:text-gray-700']">
@@ -107,6 +108,49 @@
         </form>
       </div>
     </div>
+
+    <!-- Image Lightbox -->
+    <Teleport to="body">
+      <div v-if="lightbox.open" class="fixed inset-0 z-[60] flex items-center justify-center"
+        @click="closeLightbox" @keydown.esc="closeLightbox">
+        <div class="absolute inset-0 bg-black/90 backdrop-blur-sm"></div>
+
+        <!-- Close button -->
+        <button @click="closeLightbox"
+          class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xl transition-colors">
+          ✕
+        </button>
+
+        <!-- Counter -->
+        <span v-if="lightbox.images.length > 1"
+          class="absolute top-4 left-1/2 -translate-x-1/2 z-10 text-white/70 text-sm font-medium bg-black/40 px-3 py-1 rounded-full">
+          {{ lightbox.index + 1 }} / {{ lightbox.images.length }}
+        </span>
+
+        <!-- Prev arrow -->
+        <button v-if="lightbox.images.length > 1" @click.stop="lightbox.index = (lightbox.index - 1 + lightbox.images.length) % lightbox.images.length"
+          class="absolute left-4 z-10 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-2xl transition-colors select-none">
+          ‹
+        </button>
+
+        <!-- Image -->
+        <img :src="lightbox.images[lightbox.index]" @click.stop
+          class="relative z-10 max-w-[90vw] max-h-[85vh] object-contain rounded-xl shadow-2xl select-none">
+
+        <!-- Next arrow -->
+        <button v-if="lightbox.images.length > 1" @click.stop="lightbox.index = (lightbox.index + 1) % lightbox.images.length"
+          class="absolute right-4 z-10 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-2xl transition-colors select-none">
+          ›
+        </button>
+
+        <!-- Dot indicators -->
+        <div v-if="lightbox.images.length > 1" class="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-2">
+          <button v-for="(_, i) in lightbox.images" :key="i" @click.stop="lightbox.index = i"
+            :class="['w-2 h-2 rounded-full transition-all', i === lightbox.index ? 'bg-white scale-125' : 'bg-white/40 hover:bg-white/60']">
+          </button>
+        </div>
+      </div>
+    </Teleport>
 
     <!-- Add Project Modal -->
     <Teleport to="body">
@@ -222,11 +266,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import SectionTitle from './SectionTitle.vue'
+import { t } from '../locale.js'
 
 const props = defineProps(['isDark', 'isAdmin'])
 
+const lightbox = ref({ open: false, images: [], index: 0 })
 const showModal      = ref(false)
 const editingProject = ref(null)
 const projects       = ref([])
@@ -252,6 +298,21 @@ const inputClass = computed(() => [
   'w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20',
   props.isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400',
 ])
+
+function openLightbox(project, index) {
+  lightbox.value = { open: true, images: project.image_urls, index }
+}
+
+function closeLightbox() {
+  lightbox.value.open = false
+}
+
+function onLightboxKey(e) {
+  if (!lightbox.value.open) return
+  if (e.key === 'Escape') closeLightbox()
+  if (e.key === 'ArrowRight') lightbox.value.index = (lightbox.value.index + 1) % lightbox.value.images.length
+  if (e.key === 'ArrowLeft') lightbox.value.index = (lightbox.value.index - 1 + lightbox.value.images.length) % lightbox.value.images.length
+}
 
 function openEdit(project) {
   editingProject.value = project
@@ -387,5 +448,12 @@ function closeModal() {
   error.value = ''
 }
 
-onMounted(fetchProjects)
+onMounted(() => {
+  fetchProjects()
+  window.addEventListener('keydown', onLightboxKey)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', onLightboxKey)
+})
 </script>

@@ -18,6 +18,10 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { t } from '../locale.js'
+
 defineProps(['isDark'])
-const links = ['Home', 'About', 'Projects', 'Contact']
+
+const links = computed(() => t('footer.links'))
 </script>

@@ -13,6 +13,13 @@
       </div>
 
       <div class="flex items-center gap-3">
+        <!-- Language toggle -->
+        <button @click="toggleLocale()"
+          :class="['px-3 py-1.5 rounded-full text-xs font-bold border transition-all', isDark ? 'border-gray-700 bg-gray-800 text-gray-300 hover:border-violet-500 hover:text-violet-300' : 'border-gray-300 bg-white text-gray-600 hover:border-violet-400 hover:text-violet-600']">
+          {{ locale === 'en' ? 'ID' : 'EN' }}
+        </button>
+
+        <!-- Dark mode toggle -->
         <button @click="$emit('toggleDark')"
           :class="['p-2 rounded-full transition-all', isDark ? 'bg-gray-800 hover:bg-gray-700 text-yellow-400' : 'bg-gray-200 hover:bg-gray-300 text-gray-700']">
           <span v-if="isDark">☀️</span>
@@ -20,7 +27,7 @@
         </button>
 
         <a href="#contact" class="hidden md:block px-4 py-2 rounded-full bg-gradient-to-r from-violet-600 to-cyan-500 text-white text-sm font-medium hover:opacity-90 transition-opacity">
-          Hire Me
+          {{ t('nav.hireMe') }}
         </a>
 
         <button @click="menuOpen = !menuOpen" class="md:hidden p-2">
@@ -42,7 +49,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { locale, toggleLocale, t } from '../locale.js'
 
 defineProps(['isDark'])
 defineEmits(['toggleDark'])
@@ -50,12 +58,12 @@ defineEmits(['toggleDark'])
 const scrolled = ref(false)
 const menuOpen = ref(false)
 
-const links = [
-  { href: '#about', label: 'About' },
-  { href: '#skills', label: 'Skills' },
-  { href: '#projects', label: 'Projects' },
-  { href: '#contact', label: 'Contact' },
-]
+const links = computed(() => [
+  { href: '#about',    label: t('nav.about') },
+  { href: '#skills',   label: t('nav.skills') },
+  { href: '#projects', label: t('nav.projects') },
+  { href: '#contact',  label: t('nav.contact') },
+])
 
 const handleScroll = () => { scrolled.value = window.scrollY > 50 }
 onMounted(() => window.addEventListener('scroll', handleScroll))
