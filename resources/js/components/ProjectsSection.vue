@@ -230,6 +230,8 @@ const selectedFile   = ref(null)
 
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? ''
 
+const tabs = ['All', 'Full Stack', 'Frontend', 'Backend', 'Mobile', 'Other']
+
 const emptyForm = () => ({ title: '', desc: '', tags: '', year: new Date().getFullYear().toString(), category: 'Full Stack', demo_url: '', github_url: '' })
 const form = ref(emptyForm())
 
