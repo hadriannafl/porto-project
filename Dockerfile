@@ -15,17 +15,14 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
 
 WORKDIR /app
 
-# Install PHP dependencies
-COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
-
-# Install Node dependencies and build assets
-COPY package.json package-lock.json ./
-RUN npm ci
-
+# Copy semua file dulu agar artisan tersedia saat composer install
 COPY . .
 
-RUN composer dump-autoload --optimize \
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+# Install Node dependencies dan build assets
+RUN npm install \
     && npm run build \
     && php artisan config:cache \
     && php artisan route:cache \
