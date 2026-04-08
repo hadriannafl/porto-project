@@ -10,16 +10,6 @@
         </button>
       </div>
 
-      <!-- Filter tabs -->
-      <div class="flex flex-wrap justify-center gap-2 mt-10">
-        <button v-for="tab in tabs" :key="tab" @click="activeTab = tab"
-          :class="['px-5 py-2 rounded-full text-sm font-semibold transition-all', activeTab === tab
-            ? 'bg-gradient-to-r from-violet-600 to-cyan-500 text-white shadow-lg'
-            : isDark ? 'bg-gray-800 text-gray-400 hover:bg-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200']">
-          {{ tab }}
-        </button>
-      </div>
-
       <!-- Loading skeleton -->
       <div v-if="loading" class="mt-10 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div v-for="i in 6" :key="i"
@@ -230,7 +220,6 @@ const props = defineProps(['isDark', 'isAdmin'])
 
 const showModal      = ref(false)
 const editingProject = ref(null)
-const activeTab      = ref('All')
 const projects       = ref([])
 const loading        = ref(true)
 const submitting     = ref(false)
@@ -239,16 +228,12 @@ const imagePreview   = ref('')
 const fileInput      = ref(null)
 const selectedFile   = ref(null)
 
-const tabs = ['All', 'Frontend', 'Backend', 'Full Stack']
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? ''
 
 const emptyForm = () => ({ title: '', desc: '', tags: '', year: new Date().getFullYear().toString(), category: 'Full Stack', demo_url: '', github_url: '' })
 const form = ref(emptyForm())
 
-const filteredProjects = computed(() => {
-  if (activeTab.value === 'All') return projects.value
-  return projects.value.filter(p => p.category === activeTab.value)
-})
+const filteredProjects = computed(() => projects.value)
 
 const labelClass = computed(() => ['block text-sm font-medium mb-1.5', props.isDark ? 'text-gray-300' : 'text-gray-700'])
 const inputClass = computed(() => [

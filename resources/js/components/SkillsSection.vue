@@ -49,6 +49,8 @@ const skills = [
   { icon: '🐙', name: 'Git', category: 'Tools', level: 90 },
   { icon: '☁️', name: 'AWS', category: 'Cloud', level: 40 },
   { icon: '🖥️', name: 'cPanel', category: 'Hosting', level: 70 },
+  { icon: '🔷', name: 'VB.NET', category: 'Language', level: 30 },
+  { icon: '🟣', name: 'C#', category: 'Language', level: 20 },
 ]
 
 const softSkills = [
