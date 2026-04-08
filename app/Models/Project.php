@@ -7,19 +7,30 @@ use Illuminate\Database\Eloquent\Model;
 class Project extends Model
 {
     protected $fillable = [
-        'title', 'desc', 'image', 'tags', 'year', 'category', 'bg', 'demo_url', 'github_url', 'order',
+        'title', 'desc', 'tags', 'year', 'category', 'bg', 'demo_url', 'github_url', 'order',
     ];
 
     protected $casts = [
-        'tags'  => 'array',
-        'image' => 'array',
+        'tags' => 'array',
     ];
 
-    protected $appends = ['image_urls'];
+    protected $appends = ['image', 'image_urls'];
+
+    public function projectImages()
+    {
+        return $this->hasMany(ProjectImage::class)->orderBy('sort_order');
+    }
+
+    public function getImageAttribute(): array
+    {
+        return $this->projectImages->pluck('path')->values()->toArray();
+    }
 
     public function getImageUrlsAttribute(): array
     {
-        $images = $this->image ?? [];
-        return array_values(array_map(fn($img) => asset('storage/' . $img), $images));
+        return $this->projectImages->pluck('path')
+            ->map(fn($p) => asset('storage/' . $p))
+            ->values()
+            ->toArray();
     }
 }

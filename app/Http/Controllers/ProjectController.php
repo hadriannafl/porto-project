@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
+use App\Models\ProjectImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -11,7 +12,10 @@ class ProjectController extends Controller
     public function index()
     {
         return response()->json(
-            Project::orderBy('order')->orderByDesc('created_at')->get()
+            Project::with('projectImages')
+                ->orderBy('order')
+                ->orderByDesc('created_at')
+                ->get()
         );
     }
 
@@ -41,17 +45,9 @@ class ProjectController extends Controller
             'bg-gradient-to-br from-indigo-900 to-violet-900',
         ];
 
-        $imagePaths = [];
-        if ($request->hasFile('images')) {
-            foreach (array_slice($request->file('images'), 0, 5) as $file) {
-                $imagePaths[] = $file->store('projects', 'public');
-            }
-        }
-
         $project = Project::create([
             'title'      => $data['title'],
             'desc'       => $data['desc'],
-            'image'      => $imagePaths,
             'tags'       => array_map('trim', explode(',', $data['tags'])),
             'year'       => $data['year'],
             'category'   => $data['category'],
@@ -61,7 +57,18 @@ class ProjectController extends Controller
             'order'      => 0,
         ]);
 
-        return response()->json($project, 201);
+        if ($request->hasFile('images')) {
+            foreach (array_slice($request->file('images'), 0, 5) as $i => $file) {
+                $path = $file->store('projects', 'public');
+                ProjectImage::create([
+                    'project_id' => $project->id,
+                    'path'       => $path,
+                    'sort_order' => $i,
+                ]);
+            }
+        }
+
+        return response()->json($project->load('projectImages'), 201);
     }
 
     public function update(Request $request, Project $project)
@@ -71,40 +78,43 @@ class ProjectController extends Controller
         }
 
         $data = $request->validate([
-            'title'           => 'required|string|max:255',
-            'desc'            => 'required|string',
-            'images.*'        => 'nullable|image|max:5120',
-            'removed_images'  => 'nullable|string',
-            'tags'            => 'required|string',
-            'year'            => 'required|string|size:4',
-            'category'        => 'required|in:Frontend,Backend,Full Stack,Mobile,Other',
-            'demo_url'        => 'nullable|url',
-            'github_url'      => 'nullable|url',
+            'title'          => 'required|string|max:255',
+            'desc'           => 'required|string',
+            'images.*'       => 'nullable|image|max:5120',
+            'removed_images' => 'nullable|string',
+            'tags'           => 'required|string',
+            'year'           => 'required|string|size:4',
+            'category'       => 'required|in:Frontend,Backend,Full Stack,Mobile,Other',
+            'demo_url'       => 'nullable|url',
+            'github_url'     => 'nullable|url',
         ]);
 
-        $currentImages = $project->image ?? [];
-
-        // Remove images that were deleted by user
-        if (!empty($data['removed_images'])) {
+        // Remove deleted images
+        if (! empty($data['removed_images'])) {
             $removed = json_decode($data['removed_images'], true) ?? [];
             foreach ($removed as $path) {
                 Storage::disk('public')->delete($path);
-                $currentImages = array_values(array_filter($currentImages, fn($img) => $img !== $path));
+                $project->projectImages()->where('path', $path)->delete();
             }
         }
 
         // Add new uploaded images (max 5 total)
         if ($request->hasFile('images')) {
-            $remaining = 5 - count($currentImages);
-            foreach (array_slice($request->file('images'), 0, $remaining) as $file) {
-                $currentImages[] = $file->store('projects', 'public');
+            $currentCount = $project->projectImages()->count();
+            $remaining    = 5 - $currentCount;
+            foreach (array_slice($request->file('images'), 0, $remaining) as $i => $file) {
+                $path = $file->store('projects', 'public');
+                ProjectImage::create([
+                    'project_id' => $project->id,
+                    'path'       => $path,
+                    'sort_order' => $currentCount + $i,
+                ]);
             }
         }
 
         $project->update([
             'title'      => $data['title'],
             'desc'       => $data['desc'],
-            'image'      => $currentImages,
             'tags'       => array_map('trim', explode(',', $data['tags'])),
             'year'       => $data['year'],
             'category'   => $data['category'],
@@ -112,7 +122,7 @@ class ProjectController extends Controller
             'github_url' => $data['github_url'] ?? null,
         ]);
 
-        return response()->json($project->fresh());
+        return response()->json($project->load('projectImages')->refresh());
     }
 
     public function destroy(Project $project)
@@ -121,11 +131,11 @@ class ProjectController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        foreach ($project->image ?? [] as $img) {
-            Storage::disk('public')->delete($img);
+        foreach ($project->projectImages as $img) {
+            Storage::disk('public')->delete($img->path);
         }
 
-        $project->delete();
+        $project->delete(); // cascadeOnDelete handles project_images rows
 
         return response()->json(['message' => 'Deleted']);
     }
