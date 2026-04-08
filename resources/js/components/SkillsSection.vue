@@ -43,13 +43,12 @@ const skills = [
   { icon: '🔴', name: 'Laravel', category: 'Backend', level: 88 },
   { icon: '🐘', name: 'PHP', category: 'Language', level: 85 },
   { icon: '🎨', name: 'Tailwind CSS', category: 'Styling', level: 95 },
-  { icon: '🐬', name: 'MySQL', category: 'Database', level: 80 },
-  { icon: '🔷', name: 'TypeScript', category: 'Language', level: 75 },
-  { icon: '🐳', name: 'Docker', category: 'DevOps', level: 70 },
+  { icon: '🐬', name: 'MySQL', category: 'Database', level: 95 },
   { icon: '⚛️', name: 'React', category: 'Frontend', level: 72 },
   { icon: '🍃', name: 'MongoDB', category: 'Database', level: 68 },
   { icon: '🐙', name: 'Git', category: 'Tools', level: 90 },
-  { icon: '☁️', name: 'AWS', category: 'Cloud', level: 65 },
+  { icon: '☁️', name: 'AWS', category: 'Cloud', level: 40 },
+  { icon: '🖥️', name: 'cPanel', category: 'Hosting', level: 70 },
 ]
 
 const softSkills = [

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProjectController extends Controller
 {
@@ -80,7 +81,7 @@ class ProjectController extends Controller
 
         if ($request->hasFile('image')) {
             if ($project->image) {
-                \Storage::disk('public')->delete($project->image);
+                Storage::disk('public')->delete($project->image);
             }
             $data['image'] = $request->file('image')->store('projects', 'public');
         }
@@ -106,7 +107,7 @@ class ProjectController extends Controller
         }
 
         if ($project->image) {
-            \Storage::disk('public')->delete($project->image);
+            Storage::disk('public')->delete($project->image);
         }
 
         $project->delete();
