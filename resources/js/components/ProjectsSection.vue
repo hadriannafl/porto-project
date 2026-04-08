@@ -41,7 +41,7 @@
 
           <!-- Project image -->
           <div :class="['h-48 relative overflow-hidden', project.bg, !isAdmin && project.image_urls?.length ? 'cursor-zoom-in' : '']"
-            @click.stop="!isAdmin && project.image_urls?.length && openLightbox(project, 0)">
+            @click="!isAdmin && project.image_urls?.length && openLightbox(project, 0)">
             <img v-if="project.image_urls && project.image_urls.length" :src="project.image_urls[0]" :alt="project.title"
               class="w-full h-full object-cover">
             <div v-else class="w-full h-full flex items-center justify-center">
