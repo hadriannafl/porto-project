@@ -29,10 +29,10 @@
 
           <!-- Social links -->
           <div class="flex gap-3 mt-8">
-            <a v-for="social in socials" :key="social.label" href="#"
-              :class="['w-12 h-12 rounded-xl flex items-center justify-center text-xl transition-all hover:scale-110 hover:-translate-y-1', isDark ? 'bg-gray-900 border border-gray-800 hover:border-violet-500/50' : 'bg-white border border-gray-200 hover:border-violet-300 hover:shadow-md']"
-              :title="social.label">
-              {{ social.icon }}
+            <a v-for="social in socials" :key="social.label" :href="social.href ?? '#'" :target="social.href ? '_blank' : ''"
+              :class="['px-5 py-3 rounded-xl flex items-center gap-3 transition-all hover:scale-105 hover:-translate-y-1', isDark ? 'bg-gray-900 border border-gray-800 hover:border-violet-500/50' : 'bg-white border border-gray-200 hover:border-violet-300 hover:shadow-md']">
+              <span class="text-xl">{{ social.icon }}</span>
+              <span :class="['text-sm font-semibold', isDark ? 'text-gray-300' : 'text-gray-700']">{{ social.label }}</span>
             </a>
           </div>
         </div>
@@ -128,9 +128,6 @@ const contactItems = computed(() => [
 ])
 
 const socials = [
-  { icon: '🐙', label: 'GitHub' },
-  { icon: '💼', label: 'LinkedIn' },
-  { icon: '🐦', label: 'Twitter' },
-  { icon: '📸', label: 'Instagram' },
+  { icon: '💼', label: 'LinkedIn', href: 'https://www.linkedin.com/in/hadriannaufal' },
 ]
 </script>
