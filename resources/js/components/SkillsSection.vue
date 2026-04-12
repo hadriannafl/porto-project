@@ -54,6 +54,8 @@ const skills = [
   { icon: '🖥️', name: 'cPanel',       categoryKey: 'Hosting',   level: 70 },
   { icon: '🔷', name: 'VB.NET',       categoryKey: 'Language',  level: 30 },
   { icon: '🟣', name: 'C#',           categoryKey: 'Language',  level: 20 },
+  { icon: '🤖', name: 'Android',      categoryKey: 'Mobile',    level: 65 },
+  { icon: '🎯', name: 'Dart',         categoryKey: 'Language',  level: 60 },
 ]
 
 const softSkills = computed(() => t('skills.soft'))

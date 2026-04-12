@@ -41,7 +41,7 @@ const messages = {
       categories: {
         Frontend: 'Frontend', Language: 'Language', Backend: 'Backend',
         Styling: 'Styling', Database: 'Database', Tools: 'Tools',
-        Cloud: 'Cloud', Hosting: 'Hosting',
+        Cloud: 'Cloud', Hosting: 'Hosting', Mobile: 'Mobile',
       },
       soft: ['Problem Solving', 'Team Collaboration', 'Code Review', 'Agile/Scrum', 'Technical Writing', 'UI/UX Thinking', 'Clean Code'],
     },
