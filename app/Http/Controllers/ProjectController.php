@@ -60,15 +60,17 @@ class ProjectController extends Controller
         if ($request->hasFile('images')) {
             foreach (array_slice($request->file('images'), 0, 5) as $i => $file) {
                 $path = $file->store('projects', 'public');
-                ProjectImage::create([
-                    'project_id' => $project->id,
-                    'path'       => $path,
-                    'sort_order' => $i,
-                ]);
+                if ($path) {
+                    ProjectImage::create([
+                        'project_id' => $project->id,
+                        'path'       => $path,
+                        'sort_order' => $i,
+                    ]);
+                }
             }
         }
 
-        return response()->json($project->load('projectImages'), 201);
+        return response()->json($project->fresh(['projectImages']), 201);
     }
 
     public function update(Request $request, Project $project)
@@ -104,11 +106,13 @@ class ProjectController extends Controller
             $remaining    = 5 - $currentCount;
             foreach (array_slice($request->file('images'), 0, $remaining) as $i => $file) {
                 $path = $file->store('projects', 'public');
-                ProjectImage::create([
-                    'project_id' => $project->id,
-                    'path'       => $path,
-                    'sort_order' => $currentCount + $i,
-                ]);
+                if ($path) {
+                    ProjectImage::create([
+                        'project_id' => $project->id,
+                        'path'       => $path,
+                        'sort_order' => $currentCount + $i,
+                    ]);
+                }
             }
         }
 
@@ -122,7 +126,7 @@ class ProjectController extends Controller
             'github_url' => $data['github_url'] ?? null,
         ]);
 
-        return response()->json($project->load('projectImages')->refresh());
+        return response()->json($project->fresh(['projectImages']));
     }
 
     public function destroy(Project $project)
