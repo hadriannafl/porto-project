@@ -59,14 +59,9 @@ class ProjectController extends Controller
                 'order'      => 0,
             ]);
 
-            $files = $request->files->get('images') ?? [];
-            $uploadErrors = [];
+            $files = $request->file('images') ?? [];
             foreach (array_slice((array) $files, 0, 5) as $i => $file) {
-                if (!$file) continue;
-                if (!$file->isValid()) {
-                    $uploadErrors[] = "File {$i}: error code " . $file->getError() . ' - ' . $file->getErrorMessage();
-                    continue;
-                }
+                if (!$file || !$file->isValid()) continue;
                 $path = $file->store('projects', 'public');
                 if ($path) {
                     ProjectImage::create([
@@ -77,12 +72,7 @@ class ProjectController extends Controller
                 }
             }
 
-            $result = $project->fresh(['projectImages']);
-            if (!empty($uploadErrors)) {
-                $result['upload_warnings'] = $uploadErrors;
-            }
-
-            return response()->json($result, 201);
+            return response()->json($project->fresh(['projectImages']), 201);
         } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
@@ -117,17 +107,16 @@ class ProjectController extends Controller
 
             $currentCount = $project->projectImages()->count();
             $remaining    = 5 - $currentCount;
-            $files = $request->files->get('images') ?? [];
+            $files = $request->file('images') ?? [];
             foreach (array_slice((array) $files, 0, $remaining) as $i => $file) {
-                if ($file && $file->isValid()) {
-                    $path = $file->store('projects', 'public');
-                    if ($path) {
-                        ProjectImage::create([
-                            'project_id' => $project->id,
-                            'path'       => $path,
-                            'sort_order' => $currentCount + $i,
-                        ]);
-                    }
+                if (!$file || !$file->isValid()) continue;
+                $path = $file->store('projects', 'public');
+                if ($path) {
+                    ProjectImage::create([
+                        'project_id' => $project->id,
+                        'path'       => $path,
+                        'sort_order' => $currentCount + $i,
+                    ]);
                 }
             }
 
