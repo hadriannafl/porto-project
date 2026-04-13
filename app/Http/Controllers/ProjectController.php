@@ -60,20 +60,29 @@ class ProjectController extends Controller
             ]);
 
             $files = $request->files->get('images') ?? [];
+            $uploadErrors = [];
             foreach (array_slice((array) $files, 0, 5) as $i => $file) {
-                if ($file && $file->isValid()) {
-                    $path = $file->store('projects', 'public');
-                    if ($path) {
-                        ProjectImage::create([
-                            'project_id' => $project->id,
-                            'path'       => $path,
-                            'sort_order' => $i,
-                        ]);
-                    }
+                if (!$file) continue;
+                if (!$file->isValid()) {
+                    $uploadErrors[] = "File {$i}: error code " . $file->getError() . ' - ' . $file->getErrorMessage();
+                    continue;
+                }
+                $path = $file->store('projects', 'public');
+                if ($path) {
+                    ProjectImage::create([
+                        'project_id' => $project->id,
+                        'path'       => $path,
+                        'sort_order' => $i,
+                    ]);
                 }
             }
 
-            return response()->json($project->fresh(['projectImages']), 201);
+            $result = $project->fresh(['projectImages']);
+            if (!empty($uploadErrors)) {
+                $result['upload_warnings'] = $uploadErrors;
+            }
+
+            return response()->json($result, 201);
         } catch (Throwable $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
