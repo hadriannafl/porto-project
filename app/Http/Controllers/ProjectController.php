@@ -30,7 +30,7 @@ class ProjectController extends Controller
             $data = $request->validate([
                 'title'      => 'required|string|max:255',
                 'desc'       => 'required|string',
-                'images.*'   => 'nullable|file|mimes:jpg,jpeg,png,gif,webp|max:5120',
+                'images'     => 'nullable',
                 'tags'       => 'required|string',
                 'year'       => 'required|string|size:4',
                 'category'   => 'required|in:Frontend,Backend,Full Stack,Mobile,Other',
@@ -59,8 +59,9 @@ class ProjectController extends Controller
                 'order'      => 0,
             ]);
 
-            if ($request->hasFile('images')) {
-                foreach (array_slice($request->file('images'), 0, 5) as $i => $file) {
+            $files = $request->files->get('images') ?? [];
+            foreach (array_slice((array) $files, 0, 5) as $i => $file) {
+                if ($file && $file->isValid()) {
                     $path = $file->store('projects', 'public');
                     if ($path) {
                         ProjectImage::create([
@@ -88,7 +89,7 @@ class ProjectController extends Controller
             $data = $request->validate([
                 'title'          => 'required|string|max:255',
                 'desc'           => 'required|string',
-                'images.*'       => 'nullable|file|mimes:jpg,jpeg,png,gif,webp|max:5120',
+                'images'         => 'nullable',
                 'removed_images' => 'nullable|string',
                 'tags'           => 'required|string',
                 'year'           => 'required|string|size:4',
@@ -105,10 +106,11 @@ class ProjectController extends Controller
                 }
             }
 
-            if ($request->hasFile('images')) {
-                $currentCount = $project->projectImages()->count();
-                $remaining    = 5 - $currentCount;
-                foreach (array_slice($request->file('images'), 0, $remaining) as $i => $file) {
+            $currentCount = $project->projectImages()->count();
+            $remaining    = 5 - $currentCount;
+            $files = $request->files->get('images') ?? [];
+            foreach (array_slice((array) $files, 0, $remaining) as $i => $file) {
+                if ($file && $file->isValid()) {
                     $path = $file->store('projects', 'public');
                     if ($path) {
                         ProjectImage::create([
