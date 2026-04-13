@@ -39,7 +39,9 @@ Route::post('/api/contact', function (Request $request) {
         'message' => 'required|string|max:2000',
     ]);
 
-    Mail::to(config('mail.admin_address'))->send(new ContactMail(
+    $adminAddress = config('mail.admin_address') ?? config('mail.from.address');
+
+    Mail::to($adminAddress)->send(new ContactMail(
         senderName:   $data['name'],
         senderEmail:  $data['email'],
         mailSubject:  $data['subject'],
