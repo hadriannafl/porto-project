@@ -30,7 +30,7 @@ class ProjectController extends Controller
             $data = $request->validate([
                 'title'      => 'required|string|max:255',
                 'desc'       => 'required|string',
-                'images.*'   => 'nullable|image|max:5120',
+                'images.*'   => 'nullable|file|mimes:jpg,jpeg,png,gif,webp|max:5120',
                 'tags'       => 'required|string',
                 'year'       => 'required|string|size:4',
                 'category'   => 'required|in:Frontend,Backend,Full Stack,Mobile,Other',
@@ -88,7 +88,7 @@ class ProjectController extends Controller
             $data = $request->validate([
                 'title'          => 'required|string|max:255',
                 'desc'           => 'required|string',
-                'images.*'       => 'nullable|image|max:5120',
+                'images.*'       => 'nullable|file|mimes:jpg,jpeg,png,gif,webp|max:5120',
                 'removed_images' => 'nullable|string',
                 'tags'           => 'required|string',
                 'year'           => 'required|string|size:4',
