@@ -301,6 +301,7 @@ const techList = [
   { name: 'PHP',          logo: `${CDN}/php/php-original.svg` },
   { name: 'Tailwind CSS', logo: `${CDN}/tailwindcss/tailwindcss-original.svg` },
   { name: 'MySQL',        logo: `${CDN}/mysql/mysql-original.svg` },
+  { name: 'SQL Server',   logo: `${CDN}/microsoftsqlserver/microsoftsqlserver-plain.svg` },
   { name: 'React',        logo: `${CDN}/react/react-original.svg` },
   { name: 'MongoDB',      logo: `${CDN}/mongodb/mongodb-original.svg` },
   { name: 'Node.js',      logo: `${CDN}/nodejs/nodejs-original.svg` },
