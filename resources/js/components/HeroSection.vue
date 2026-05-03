@@ -72,7 +72,7 @@ import { locale, t } from '../locale.js'
 
 defineProps(['isDark'])
 
-const name = 'Ian Dev'
+const name = 'Hadrian Naufal'
 const roles = computed(() => t('hero.roles'))
 const roleIndex = ref(0)
 const currentRole = computed(() => roles.value[roleIndex.value] ?? roles.value[0])

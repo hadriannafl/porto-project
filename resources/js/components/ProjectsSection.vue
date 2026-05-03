@@ -69,11 +69,11 @@
           </div>
 
           <div class="p-6">
-            <div class="flex flex-wrap gap-1.5 mb-3">
-              <span v-for="tag in project.tags" :key="tag"
-                :class="['px-2.5 py-0.5 rounded-full text-xs font-medium', isDark ? 'bg-violet-950 text-violet-300 border border-violet-800' : 'bg-violet-50 text-violet-700 border border-violet-200']">
-                {{ tag }}
-              </span>
+            <div class="flex flex-wrap gap-2 mb-3">
+              <template v-for="tag in project.tags" :key="tag">
+                <img v-if="getTagLogo(tag)" :src="getTagLogo(tag)" :alt="tag" :title="tag" class="w-7 h-7 object-contain" />
+                <span v-else :class="['px-2.5 py-0.5 rounded-full text-xs font-medium', isDark ? 'bg-violet-950 text-violet-300 border border-violet-800' : 'bg-violet-50 text-violet-700 border border-violet-200']">{{ tag }}</span>
+              </template>
             </div>
             <h3 :class="['text-lg font-bold mb-2', isDark ? 'text-white' : 'text-gray-900']">{{ project.title }}</h3>
             <p :class="['text-sm leading-relaxed', isDark ? 'text-gray-400' : 'text-gray-600']">{{ project.desc }}</p>
@@ -229,8 +229,14 @@
             </div>
 
             <div>
-              <label :class="labelClass">Tags <span :class="isDark ? 'text-gray-500' : 'text-gray-400'">(comma separated)</span></label>
-              <input v-model="form.tags" type="text" placeholder="Vue.js, Laravel, MySQL" :class="inputClass">
+              <label :class="labelClass">Tags</label>
+              <div :class="['flex flex-wrap gap-2 p-3 rounded-xl border max-h-52 overflow-y-auto', isDark ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-300']">
+                <button v-for="tech in techList" :key="tech.name" type="button" @click="toggleTag(tech.name)" :title="tech.name"
+                  :class="['flex flex-col items-center gap-1 p-2 rounded-xl border-2 transition-all', isTagSelected(tech.name) ? 'border-violet-500 bg-violet-500/20' : isDark ? 'border-gray-700 hover:border-gray-600 bg-gray-900/50' : 'border-gray-200 hover:border-gray-300 bg-white']">
+                  <img :src="tech.logo" :alt="tech.name" class="w-7 h-7 object-contain" />
+                  <span :class="['text-[10px] leading-tight text-center w-12 truncate', isTagSelected(tech.name) ? 'text-violet-400 font-medium' : isDark ? 'text-gray-500' : 'text-gray-400']">{{ tech.name }}</span>
+                </button>
+              </div>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
@@ -286,6 +292,47 @@ const removedPaths   = ref([])
 
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? ''
 
+const CDN = 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons'
+const techList = [
+  { name: 'Vue.js',       logo: `${CDN}/vuejs/vuejs-original.svg` },
+  { name: 'JavaScript',   logo: `${CDN}/javascript/javascript-original.svg` },
+  { name: 'TypeScript',   logo: `${CDN}/typescript/typescript-original.svg` },
+  { name: 'Laravel',      logo: `${CDN}/laravel/laravel-original.svg` },
+  { name: 'PHP',          logo: `${CDN}/php/php-original.svg` },
+  { name: 'Tailwind CSS', logo: `${CDN}/tailwindcss/tailwindcss-original.svg` },
+  { name: 'MySQL',        logo: `${CDN}/mysql/mysql-original.svg` },
+  { name: 'React',        logo: `${CDN}/react/react-original.svg` },
+  { name: 'MongoDB',      logo: `${CDN}/mongodb/mongodb-original.svg` },
+  { name: 'Node.js',      logo: `${CDN}/nodejs/nodejs-original.svg` },
+  { name: 'Python',       logo: `${CDN}/python/python-original.svg` },
+  { name: 'Docker',       logo: `${CDN}/docker/docker-original.svg` },
+  { name: 'PostgreSQL',   logo: `${CDN}/postgresql/postgresql-original.svg` },
+  { name: 'Git',          logo: `${CDN}/git/git-original.svg` },
+  { name: 'AWS',          logo: `${CDN}/amazonwebservices/amazonwebservices-plain-wordmark.svg` },
+  { name: 'Firebase',     logo: `${CDN}/firebase/firebase-original.svg` },
+  { name: 'Flutter',      logo: `${CDN}/flutter/flutter-original.svg` },
+  { name: 'Dart',         logo: `${CDN}/dart/dart-original.svg` },
+  { name: 'Android',      logo: `${CDN}/android/android-plain.svg` },
+  { name: 'C#',           logo: `${CDN}/csharp/csharp-original.svg` },
+  { name: 'Java',         logo: `${CDN}/java/java-original.svg` },
+  { name: 'HTML',         logo: `${CDN}/html5/html5-original.svg` },
+  { name: 'CSS',          logo: `${CDN}/css3/css3-original.svg` },
+  { name: 'Bootstrap',    logo: `${CDN}/bootstrap/bootstrap-original.svg` },
+  { name: 'Redis',        logo: `${CDN}/redis/redis-original.svg` },
+  { name: 'VB.NET',       logo: `${CDN}/visualbasic/visualbasic-plain.svg` },
+]
+const techLogoMap = Object.fromEntries(techList.map(t => [t.name, t.logo]))
+function getTagLogo(tag) { return techLogoMap[tag] ?? null }
+
+const selectedTags = ref([])
+function toggleTag(name) {
+  const i = selectedTags.value.indexOf(name)
+  if (i === -1) selectedTags.value.push(name)
+  else selectedTags.value.splice(i, 1)
+  form.value.tags = selectedTags.value.join(', ')
+}
+function isTagSelected(name) { return selectedTags.value.includes(name) }
+
 const tabs = ['All', 'Full Stack', 'Frontend', 'Backend', 'Mobile', 'Other']
 
 const emptyForm = () => ({ title: '', desc: '', tags: '', year: new Date().getFullYear().toString(), category: 'Full Stack', demo_url: '', github_url: '' })
@@ -329,6 +376,9 @@ function openEdit(project) {
   const urls  = project.image_urls ?? []
   imagePreviews.value = paths.map((path, i) => ({ url: urls[i] ?? '', file: null, path }))
   removedPaths.value = []
+  selectedTags.value = Array.isArray(project.tags)
+    ? [...project.tags]
+    : String(project.tags ?? '').split(',').map(t => t.trim()).filter(Boolean)
   showModal.value = true
 }
 
@@ -468,6 +518,7 @@ function closeModal() {
   form.value = emptyForm()
   imagePreviews.value = []
   removedPaths.value = []
+  selectedTags.value = []
   if (fileInput.value) fileInput.value.value = ''
   error.value = ''
 }

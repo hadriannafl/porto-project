@@ -7,7 +7,9 @@
       <div class="mt-16 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
         <div v-for="skill in skills" :key="skill.name"
           :class="['group p-6 rounded-2xl border cursor-default transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl', isDark ? 'bg-gray-900 border-gray-800 hover:border-violet-500/50 hover:shadow-violet-500/10' : 'bg-white border-gray-200 hover:border-violet-300 hover:shadow-violet-100']">
-          <div class="text-4xl mb-3">{{ skill.icon }}</div>
+          <div class="mb-3 w-10 h-10">
+            <img :src="skill.logo" :alt="skill.name" class="w-10 h-10 object-contain" />
+          </div>
           <div :class="['font-bold', isDark ? 'text-white' : 'text-gray-800']">{{ skill.name }}</div>
           <div :class="['text-xs mt-1 mb-3', isDark ? 'text-gray-500' : 'text-gray-400']">{{ t('skills.categories.' + skill.categoryKey) }}</div>
           <!-- Progress bar -->
@@ -40,22 +42,24 @@ import { t } from '../locale.js'
 
 defineProps(['isDark'])
 
+const CDN = 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons'
+
 const skills = [
-  { icon: '💚', name: 'Vue.js',       categoryKey: 'Frontend',  level: 92 },
-  { icon: '⚡', name: 'JavaScript',   categoryKey: 'Language',  level: 90 },
-  { icon: '🔴', name: 'Laravel',      categoryKey: 'Backend',   level: 88 },
-  { icon: '🐘', name: 'PHP',          categoryKey: 'Language',  level: 85 },
-  { icon: '🎨', name: 'Tailwind CSS', categoryKey: 'Styling',   level: 95 },
-  { icon: '🐬', name: 'MySQL',        categoryKey: 'Database',  level: 95 },
-  { icon: '⚛️', name: 'React',        categoryKey: 'Frontend',  level: 72 },
-  { icon: '🍃', name: 'MongoDB',      categoryKey: 'Database',  level: 68 },
-  { icon: '🐙', name: 'Git',          categoryKey: 'Tools',     level: 90 },
-  { icon: '☁️', name: 'AWS',          categoryKey: 'Cloud',     level: 40 },
-  { icon: '🖥️', name: 'cPanel',       categoryKey: 'Hosting',   level: 70 },
-  { icon: '🔷', name: 'VB.NET',       categoryKey: 'Language',  level: 30 },
-  { icon: '🟣', name: 'C#',           categoryKey: 'Language',  level: 20 },
-  { icon: '🤖', name: 'Android',      categoryKey: 'Mobile',    level: 65 },
-  { icon: '🎯', name: 'Dart',         categoryKey: 'Language',  level: 60 },
+  { logo: `${CDN}/vuejs/vuejs-original.svg`,                                       name: 'Vue.js',       categoryKey: 'Frontend',  level: 92 },
+  { logo: `${CDN}/javascript/javascript-original.svg`,                             name: 'JavaScript',   categoryKey: 'Language',  level: 90 },
+  { logo: `${CDN}/laravel/laravel-original.svg`,                                   name: 'Laravel',      categoryKey: 'Backend',   level: 88 },
+  { logo: `${CDN}/php/php-original.svg`,                                           name: 'PHP',          categoryKey: 'Language',  level: 85 },
+  { logo: `${CDN}/tailwindcss/tailwindcss-original.svg`,                           name: 'Tailwind CSS', categoryKey: 'Styling',   level: 95 },
+  { logo: `${CDN}/mysql/mysql-original.svg`,                                       name: 'MySQL',        categoryKey: 'Database',  level: 95 },
+  { logo: `${CDN}/react/react-original.svg`,                                       name: 'React',        categoryKey: 'Frontend',  level: 72 },
+  { logo: `${CDN}/mongodb/mongodb-original.svg`,                                   name: 'MongoDB',      categoryKey: 'Database',  level: 68 },
+  { logo: `${CDN}/git/git-original.svg`,                                           name: 'Git',          categoryKey: 'Tools',     level: 90 },
+  { logo: `${CDN}/amazonwebservices/amazonwebservices-plain-wordmark.svg`,         name: 'AWS',          categoryKey: 'Cloud',     level: 40 },
+  { logo: `${CDN}/cpanel/cpanel-original.svg`,                                     name: 'cPanel',       categoryKey: 'Hosting',   level: 70 },
+  { logo: `${CDN}/visualbasic/visualbasic-plain.svg`,                              name: 'VB.NET',       categoryKey: 'Language',  level: 30 },
+  { logo: `${CDN}/csharp/csharp-original.svg`,                                     name: 'C#',           categoryKey: 'Language',  level: 20 },
+  { logo: `${CDN}/android/android-plain.svg`,                                      name: 'Android',      categoryKey: 'Mobile',    level: 65 },
+  { logo: `${CDN}/dart/dart-original.svg`,                                         name: 'Dart',         categoryKey: 'Language',  level: 60 },
 ]
 
 const softSkills = computed(() => t('skills.soft'))
