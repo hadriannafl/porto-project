@@ -60,6 +60,8 @@ const skills = [
   { logo: `${CDN}/csharp/csharp-original.svg`,                                     name: 'C#',           categoryKey: 'Language',  level: 20 },
   { logo: `${CDN}/android/android-plain.svg`,                                      name: 'Android',      categoryKey: 'Mobile',    level: 65 },
   { logo: `${CDN}/dart/dart-original.svg`,                                         name: 'Dart',         categoryKey: 'Language',  level: 60 },
+  { logo: `${CDN}/livewire/livewire-original.svg`,                                 name: 'Livewire',     categoryKey: 'Backend',   level: 82 },
+  { logo: `${CDN}/alpinejs/alpinejs-original.svg`,                                 name: 'Alpine.js',    categoryKey: 'Frontend',  level: 80 },
 ]
 
 const softSkills = computed(() => t('skills.soft'))

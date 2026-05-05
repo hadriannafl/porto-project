@@ -321,6 +321,8 @@ const techList = [
   { name: 'Bootstrap',    logo: `${CDN}/bootstrap/bootstrap-original.svg` },
   { name: 'Redis',        logo: `${CDN}/redis/redis-original.svg` },
   { name: 'VB.NET',       logo: `${CDN}/visualbasic/visualbasic-plain.svg` },
+  { name: 'Livewire',    logo: `${CDN}/livewire/livewire-original.svg` },
+  { name: 'Alpine.js',   logo: `${CDN}/alpinejs/alpinejs-original.svg` },
 ]
 const techLogoMap = Object.fromEntries(techList.map(t => [t.name, t.logo]))
 function getTagLogo(tag) { return techLogoMap[tag] ?? null }
