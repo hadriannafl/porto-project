@@ -11,6 +11,10 @@ class ProjectSeeder extends Seeder
 {
     public function run(): void
     {
+        // Wipe all existing projects and images so old manually-entered data doesn't linger
+        ProjectImage::query()->delete();
+        Project::query()->delete();
+
         $bgs = [
             'bg-gradient-to-br from-violet-900 to-purple-900',
             'bg-gradient-to-br from-cyan-900 to-blue-900',
@@ -105,8 +109,7 @@ class ProjectSeeder extends Seeder
             $imagesDir = $data['images_dir'];
             unset($data['images_dir']);
 
-            $project = Project::updateOrCreate(
-                ['title' => $data['title']],
+            $project = Project::create(
                 array_merge($data, ['bg' => $bgs[$i % count($bgs)]])
             );
 
@@ -114,9 +117,6 @@ class ProjectSeeder extends Seeder
             if (! File::isDirectory($sourcePath)) {
                 continue;
             }
-
-            // Remove any old storage-based images and re-seed with public/image/ paths
-            $project->projectImages()->delete();
 
             $files = collect(File::files($sourcePath))->sortBy(fn($f) => $f->getFilename());
 
