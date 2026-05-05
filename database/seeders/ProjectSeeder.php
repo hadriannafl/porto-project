@@ -12,8 +12,8 @@ class ProjectSeeder extends Seeder
     public function run(): void
     {
         // Wipe all existing projects and images so old manually-entered data doesn't linger
-        ProjectImage::query()->delete();
-        Project::query()->delete();
+        \DB::table('project_images')->delete();
+        \DB::table('projects')->delete();
 
         $bgs = [
             'bg-gradient-to-br from-violet-900 to-purple-900',
