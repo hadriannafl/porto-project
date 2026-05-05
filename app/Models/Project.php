@@ -29,7 +29,10 @@ class Project extends Model
     public function getImageUrlsAttribute(): array
     {
         return $this->projectImages->pluck('path')
-            ->map(fn($p) => asset('storage/' . $p))
+            ->map(fn($p) => str_starts_with($p, 'projects/')
+                ? asset('storage/' . $p)
+                : asset($p)
+            )
             ->values()
             ->toArray();
     }

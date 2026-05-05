@@ -6,7 +6,6 @@ use App\Models\Project;
 use App\Models\ProjectImage;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
 
 class ProjectSeeder extends Seeder
 {
@@ -111,27 +110,20 @@ class ProjectSeeder extends Seeder
                 array_merge($data, ['bg' => $bgs[$i % count($bgs)]])
             );
 
-            if ($project->projectImages()->count() > 0) {
-                continue;
-            }
-
             $sourcePath = public_path("image/{$imagesDir}");
             if (! File::isDirectory($sourcePath)) {
                 continue;
             }
 
+            // Remove any old storage-based images and re-seed with public/image/ paths
+            $project->projectImages()->delete();
+
             $files = collect(File::files($sourcePath))->sortBy(fn($f) => $f->getFilename());
 
             foreach ($files as $j => $file) {
-                $slug     = strtolower(str_replace('_', '-', $imagesDir));
-                $destName = "{$slug}-" . ($j + 1) . '.' . $file->getExtension();
-                $destPath = "projects/{$destName}";
-
-                Storage::disk('public')->put($destPath, File::get($file->getPathname()));
-
                 ProjectImage::create([
                     'project_id' => $project->id,
-                    'path'       => $destPath,
+                    'path'       => "image/{$imagesDir}/{$file->getFilename()}",
                     'sort_order' => $j,
                 ]);
             }
