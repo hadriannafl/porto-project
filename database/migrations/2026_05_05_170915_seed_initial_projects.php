@@ -42,7 +42,7 @@ return new class extends Migration
             [
                 'title'    => 'ERP System',
                 'desc'     => 'Sistem ERP (Enterprise Resource Planning) untuk manajemen inventori, pembelian, penjualan, dan laporan keuangan dalam satu platform terintegrasi.',
-                'tags'     => json_encode(['PHP', 'Laravel', 'MySQL', 'Bootstrap', 'jQuery']),
+                'tags'     => json_encode(['PHP', 'Laravel', 'MySQL', 'Bootstrap']),
                 'year'     => '2024',
                 'category' => 'Full Stack',
                 'order'    => 3,
@@ -60,7 +60,7 @@ return new class extends Migration
             [
                 'title'    => 'UM Admin Dashboard',
                 'desc'     => 'Dashboard admin untuk manajemen pengguna, hak akses, dan konfigurasi sistem dengan antarmuka yang bersih dan intuitif.',
-                'tags'     => json_encode(['PHP', 'Laravel', 'MySQL', 'Bootstrap', 'jQuery']),
+                'tags'     => json_encode(['PHP', 'Laravel', 'MySQL', 'Bootstrap']),
                 'year'     => '2024',
                 'category' => 'Full Stack',
                 'order'    => 5,
