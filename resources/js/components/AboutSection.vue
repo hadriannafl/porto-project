@@ -15,27 +15,6 @@
               </div>
             </div>
 
-            <!-- Orbit path ring (decorative) -->
-            <div class="absolute inset-0 rounded-full border border-dashed border-violet-500/25 scale-[1.22]"></div>
-
-            <!-- Orbiting badges: each absolutely at center, moved via keyframe -->
-            <div :class="['orbit-badge-1 absolute px-3 py-1.5 rounded-xl text-xs font-bold shadow-lg whitespace-nowrap pointer-events-none select-none',
-              isDark ? 'bg-violet-900 text-violet-200 border border-violet-700' : 'bg-violet-100 text-violet-800']"
-              style="top: 50%; left: 50%;">
-              Vue.js ⚡
-            </div>
-
-            <div :class="['orbit-badge-2 absolute px-3 py-1.5 rounded-xl text-xs font-bold shadow-lg whitespace-nowrap pointer-events-none select-none',
-              isDark ? 'bg-cyan-900 text-cyan-200 border border-cyan-700' : 'bg-cyan-100 text-cyan-800']"
-              style="top: 50%; left: 50%;">
-              Laravel 🚀
-            </div>
-
-            <div :class="['orbit-badge-3 absolute px-3 py-1.5 rounded-xl text-xs font-bold shadow-lg whitespace-nowrap pointer-events-none select-none',
-              isDark ? 'bg-purple-900 text-purple-200 border border-purple-700' : 'bg-purple-100 text-purple-800']"
-              style="top: 50%; left: 50%;">
-              Blazor 🔷
-            </div>
           </div>
         </div>
 
@@ -90,35 +69,4 @@ const infos = computed(() => [
 </script>
 
 <style scoped>
-/* Shared: badge starts at center of avatar, then transform moves it to orbit position */
-/* Pattern: rotate(start) translateX(radius) rotate(-start) translate(-50%, -50%) */
-/* The orbit animation adds 360° to the outer rotate and -360° to the inner rotate */
-
-.orbit-badge-1 {
-  animation: orbit-1 10s linear infinite;
-}
-.orbit-badge-2 {
-  animation: orbit-2 10s linear infinite;
-}
-.orbit-badge-3 {
-  animation: orbit-3 10s linear infinite;
-}
-
-/* Badge 1 starts at 270° (top) */
-@keyframes orbit-1 {
-  from { transform: translate(-50%, -50%) rotate(270deg) translateX(155px) rotate(-270deg); }
-  to   { transform: translate(-50%, -50%) rotate(630deg) translateX(155px) rotate(-630deg); }
-}
-
-/* Badge 2 starts at 270° + 120° = 390° (lower-right) */
-@keyframes orbit-2 {
-  from { transform: translate(-50%, -50%) rotate(390deg) translateX(155px) rotate(-390deg); }
-  to   { transform: translate(-50%, -50%) rotate(750deg) translateX(155px) rotate(-750deg); }
-}
-
-/* Badge 3 starts at 270° + 240° = 510° (lower-left) */
-@keyframes orbit-3 {
-  from { transform: translate(-50%, -50%) rotate(510deg) translateX(155px) rotate(-510deg); }
-  to   { transform: translate(-50%, -50%) rotate(870deg) translateX(155px) rotate(-870deg); }
-}
 </style>
