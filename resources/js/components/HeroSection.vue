@@ -57,10 +57,18 @@
     </div>
 
     <!-- Scroll indicator -->
-    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce">
-      <span :class="['text-xs', isDark ? 'text-gray-500' : 'text-gray-400']">{{ t('hero.scrollDown') }}</span>
-      <div :class="['w-5 h-8 rounded-full border-2 flex items-start justify-center pt-1', isDark ? 'border-gray-600' : 'border-gray-400']">
-        <div :class="['w-1 h-2 rounded-full animate-bounce', isDark ? 'bg-gray-400' : 'bg-gray-500']"></div>
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 scroll-indicator">
+      <span :class="['text-xs tracking-widest uppercase font-medium', isDark ? 'text-gray-500' : 'text-gray-400']">{{ t('hero.scrollDown') }}</span>
+      <div class="flex flex-col items-center gap-0.5 mt-1">
+        <svg class="arrow-1 w-4 h-4" :class="isDark ? 'text-violet-400' : 'text-violet-500'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+        <svg class="arrow-2 w-4 h-4" :class="isDark ? 'text-violet-500' : 'text-violet-600'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+        <svg class="arrow-3 w-4 h-4" :class="isDark ? 'text-cyan-500' : 'text-cyan-600'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
       </div>
     </div>
   </section>
@@ -86,3 +94,15 @@ onMounted(() => {
 watch(locale, () => { roleIndex.value = 0 })
 onUnmounted(() => clearInterval(interval))
 </script>
+
+<style scoped>
+.arrow-1 { animation: fade-down 1.5s ease-in-out infinite; animation-delay: 0s; }
+.arrow-2 { animation: fade-down 1.5s ease-in-out infinite; animation-delay: 0.2s; }
+.arrow-3 { animation: fade-down 1.5s ease-in-out infinite; animation-delay: 0.4s; }
+
+@keyframes fade-down {
+  0%   { opacity: 0.2; transform: translateY(-4px); }
+  50%  { opacity: 1;   transform: translateY(2px); }
+  100% { opacity: 0.2; transform: translateY(-4px); }
+}
+</style>

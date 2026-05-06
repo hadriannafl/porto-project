@@ -15,6 +15,9 @@
               </div>
             </div>
 
+            <!-- Orbit path ring (decorative) -->
+            <div class="absolute inset-0 rounded-full border border-dashed border-violet-500/25 scale-[1.22]"></div>
+
           </div>
         </div>
 
